@@ -1,5 +1,4 @@
-# [MICCAI 2025] CSAL-3D: Cold-start Active Learning for 3D Medical Image Segmentation via SSL-driven Uncertainty-Reinforced Diversity Sampling
-This repository contains the official implementation of our paper:
+# [MICCAI 2025] CSAL-3D
 
 **CSAL-3D: Cold-start Active Learning for 3D Medical Image Segmentation via SSL-driven Uncertainty-Reinforced Diversity Sampling**, for MICCAI 2025 (Early Accept).
 ## 📌 Overall Framework
@@ -9,8 +8,8 @@ The overall CSAL-3D pipeline consists of:
 - An **Ensemble-based Uncertainty Estimation** strategy to generate sample-level uncertainty scores.
 - A **URDS (Uncertainty-Reinforced Diversity Sampling)** method that hierarchically combines diversity and uncertainty for one-shot sample selection.
 
-  ## 📁 Dataset Download
-  We evaluate our method on three publicly available 3D medical image segmentation datasets from the **Medical Segmentation Decathlon (MSD)**:
+## 📁 Dataset Download
+We evaluate our method on three publicly available 3D medical image segmentation datasets from the **Medical Segmentation Decathlon (MSD)**:
 - **Brain Tumor (Task01_BrainTumour)** [MRI, multi-modality]
 - **Heart (Task02_Heart)** [MRI]
 - **Spleen (Task09_Spleen)** [CT]
