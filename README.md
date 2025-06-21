@@ -2,7 +2,7 @@
 This repository contains the official implementation of our paper:
 **CSAL-3D: Cold-start Active Learning for 3D Medical Image Segmentation via SSL-driven Uncertainty-Reinforced Diversity Sampling**, for 28th International Conference on Medical Image Computing and Computer Assisted Intervention (MICCAI 2025, Early Accept).
 ## 📌 Overall Framework
-'''
+'''markdown
 ![Framework](Workflow.pdf)
 '''
 The overall CSAL-3D pipeline consists of:
