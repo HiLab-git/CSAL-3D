@@ -9,7 +9,7 @@ The overall CSAL-3D pipeline consists of:
 - An **Ensemble-based Uncertainty Estimation** strategy to generate sample-level uncertainty scores.
 - A **URDS (Uncertainty-Reinforced Diversity Sampling)** method that hierarchically combines diversity and uncertainty for one-shot sample selection.
 
-## 📁 Dataset Download
+## 📁 Dataset and Dependency
 We evaluate our method on three publicly available 3D medical image segmentation datasets from the **Medical Segmentation Decathlon (MSD)**:
 - **Brain Tumor (Task01_BrainTumour)** [MRI, multi-modality]
 - **Heart (Task02_Heart)** [MRI]
