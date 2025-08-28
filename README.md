@@ -19,7 +19,7 @@ We evaluate our method on three publicly available 3D medical image segmentation
 
 ### Environment Setup
 
-We recommend using Python 3.8+ with PyTorch 2.3.1 and MONAI 1.3+.
+Python 3.8+ with PyTorch 2.3.1 and MONAI 1.3+.
 
 ## 🙏 Acknowledgement 
 Our codebase is built upon the excellent COLosSAL project (https://github.com/han-liu/COLosSAL), which provides a benchmark for Cold-Start Active Learning in 3D medical image segmentation.
