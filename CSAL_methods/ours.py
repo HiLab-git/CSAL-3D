@@ -116,4 +116,5 @@ def generate_Uncertainty_Kmeans_plan(organ, feats_file, score_file, num_samples,
     np.savez(save_path, paths=paths)
 
 
-generate_Uncertainty_Kmeans_plan(organ='BrainTumour_Multi-Modality', feats_file='./BrainTumour/feats/Ours.npz', score_file='./BrainTumour/feats/Ours_scores.tsv', num_samples=30, search_nums=3)
+if __name__ == '__main__'
+    generate_Uncertainty_Kmeans_plan(organ='BrainTumour_Multi-Modality', feats_file='./BrainTumour/feats/Ours.npz', score_file='./BrainTumour/feats/Ours_scores.tsv', num_samples=30, search_nums=3)

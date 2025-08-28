@@ -27,4 +27,4 @@ def generate_selection_plan(organ, feats_file, score_file, num_samples):
     save_path = f'./{organ}/plans/Ours_uncertainty_{num_samples}.npz'
     np.savez(save_path, paths=paths)
 
-generate_selection_plan(organ='Lung', feats_file='./Lung/feats/Ours.npz', score_file='./Lung/feats/Ours_scores.tsv', num_samples=5)
+generate_selection_plan(organ='Heart', feats_file='./Heart/feats/Ours.npz', score_file='./Lung/feats/Ours_scores.tsv', num_samples=5)

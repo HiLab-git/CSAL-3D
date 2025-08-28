@@ -401,17 +401,14 @@ class FeatureExtracter_slicing_window(object):
                     pbar.update(1)
     
     def sliding_window_processing(self, img, window_size, stride):
-        # 计算padding的大小
         padding = [(w - s % w) % w for s, w in zip(img.shape[2:], window_size)]
         pad = [(p // 2, p - p // 2) for p in padding]
         pad = [item for sublist in pad for item in sublist]  # Flatten list
         img = torch.nn.functional.pad(img, pad, mode='constant', value=0)
         
-        # 初始化存储每个体素的方差和值的数组
         variance_sum = torch.zeros_like(img)
         count = torch.zeros_like(img)
         
-        # 计算滑动窗口的起始和结束位置
         for i in range(0, img.shape[2] - window_size[0] + 1, stride[0]):
             for j in range(0, img.shape[3] - window_size[1] + 1, stride[1]):
                 for k in range(0, img.shape[4] - window_size[2] + 1, stride[2]):
@@ -421,7 +418,6 @@ class FeatureExtracter_slicing_window(object):
                     variance_sum[:, :, i:i+window_size[0], j:j+window_size[1], k:k+window_size[2]] += window_variance
                     count[:, :, i:i+window_size[0], j:j+window_size[1], k:k+window_size[2]] += 1
         
-        # 计算每个体素的平均方差
         mean_variance = variance_sum / count
         mean_variance = torch.mean(mean_variance).cpu().item()
         return mean_variance

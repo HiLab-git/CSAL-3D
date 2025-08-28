@@ -13,7 +13,6 @@ def process_labels(input_dir, output_dir):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # 查找输入目录下所有 .nii.gz 文件
     label_paths = glob(os.path.join(input_dir, "*.nii.gz"))
 
     for label_path in label_paths:

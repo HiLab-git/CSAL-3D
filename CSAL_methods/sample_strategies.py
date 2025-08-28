@@ -27,46 +27,34 @@ def select_valuable_samples_FPS(feats, name_list, num_samples):
     """
     num_clusters = num_samples // 2  # Number of clusters for KMeans
 
-    # Perform KMeans clustering
     kmeans = KMeans(n_clusters=num_clusters, random_state=0)
     kmeans.fit(feats)
 
-    # Get the labels of each point
     labels = kmeans.labels_
 
     select_samples_list = []
 
-    # Handle odd number of samples
     extra_sample_needed = num_samples % 2 == 1
 
     for i in range(num_clusters):
-        # Get the indices of samples in the current cluster
         cluster_indices = np.where(labels == i)[0]
-
-        # Get the feature vectors of the samples in the cluster
         cluster_feats = feats[cluster_indices]
 
-        # Compute pairwise Euclidean distances within the cluster
         distances = cdist(cluster_feats, cluster_feats, metric='euclidean')
 
-        # Find the indices of the two samples with the maximum distance
         max_dist_indices = np.unravel_index(np.argmax(distances), distances.shape)
 
-        # Get the original indices of these two samples
         sample1_index = cluster_indices[max_dist_indices[0]]
         sample2_index = cluster_indices[max_dist_indices[1]]
 
-        # Add the corresponding sample names to the list
         select_samples_list.append(name_list[sample1_index])
         select_samples_list.append(name_list[sample2_index])
 
-    # If an extra sample is needed (odd number of samples), select one sample from the last cluster
     if extra_sample_needed:
         last_cluster_indices = np.where(labels == num_clusters - 1)[0]
-        # Select only one sample, which could be the first one in the last cluster
         select_samples_list.append(name_list[last_cluster_indices[0]])
 
-    return select_samples_list[:num_samples]  # Return exactly num_samples
+    return select_samples_list[:num_samples]  
 
 def generate_FPS_plan(organ, feats_file, num_samples):
     np.random.seed(0)
@@ -91,13 +79,9 @@ def compute_typicality(cluster_feats):
     Returns:
     - typicalities: ndarray of shape (n_c,), typicality of each sample.
     """
-    # Compute pairwise Euclidean distances within the cluster
+
     distances = cdist(cluster_feats, cluster_feats, metric='euclidean')
-
-    # Compute average distance to all other points for each sample
     avg_distances = np.mean(distances, axis=1)
-
-    # Compute typicality as the inverse of the average distance
     typicalities = 1 / avg_distances
 
     return typicalities
@@ -114,29 +98,20 @@ def select_valuable_samples_TypiClust(feats, name_list, num_samples):
     Returns:
     - select_samples_list: list of selected sample names.
     """
-    # Perform KMeans clustering
     kmeans = KMeans(n_clusters=num_samples, random_state=0)
     kmeans.fit(feats)
 
-    # Get the labels of each point
     labels = kmeans.labels_
     select_samples_list = []
 
 
     for i in range(num_samples):
-        # Get the indices of samples in the current cluster
         cluster_indices = np.where(labels == i)[0]
-
-        # Get the feature vectors of the samples in the cluster
         cluster_feats = feats[cluster_indices]
 
-        # Compute typicality for each sample in the cluster
         typicalities = compute_typicality(cluster_feats)
-
-        # Get the index of the sample with the highest typicality
         highest_typicality_index = cluster_indices[np.argmax(typicalities)]
 
-        # Add the corresponding sample name to the list
         select_samples_list.append(name_list[highest_typicality_index])
 
     return select_samples_list
@@ -164,10 +139,8 @@ def compute_information_density(cluster_feats):
     Returns:
     - densities: ndarray of shape (n_c,), information density of each sample.
     """
-    # Compute cosine similarity matrix for the cluster
-    similarity_matrix = cosine_similarity(cluster_feats)
 
-    # Compute information density for each sample
+    similarity_matrix = cosine_similarity(cluster_feats)
     densities = similarity_matrix.mean(axis=1)
 
     return densities
@@ -188,25 +161,17 @@ def select_valuable_samples_CALR(feats, name_list, num_samples):
     birch = Birch(n_clusters=num_samples)
     birch.fit(feats)
 
-    # Get the labels of each point
     labels = birch.labels_
 
     select_samples_list = []
 
     for i in range(num_samples):
-        # Get the indices of samples in the current cluster
         cluster_indices = np.where(labels == i)[0]
-
-        # Get the feature vectors of the samples in the cluster
         cluster_feats = feats[cluster_indices]
-
-        # Compute information density for each sample in the cluster
         densities = compute_information_density(cluster_feats)
 
-        # Get the index of the sample with the highest information density
         highest_density_index = cluster_indices[np.argmax(densities)]
 
-        # Add the corresponding sample name to the list
         select_samples_list.append(name_list[highest_density_index])
 
     return select_samples_list
@@ -249,16 +214,12 @@ def select_valuable_samples_ALPS(feats, name_list, num_samples):
     select_samples_list = []
 
     for i in range(num_samples):
-        # Get the indices of samples in the current cluster
         cluster_indices = np.where(labels == i)[0]
 
-        # Compute the distance from each sample in the cluster to the cluster center
         distances = np.linalg.norm(feats[cluster_indices] - centers[i], axis=1)
 
-        # Get the index of the sample closest to the cluster center
         closest_index = cluster_indices[np.argmin(distances)]
 
-        # Add the corresponding sample name to the list
         select_samples_list.append(name_list[closest_index])
 
     return select_samples_list
@@ -549,23 +510,19 @@ def select_valuable_samples_USL_T(feats, name_list, num_samples, k=5, alpha=2, n
     nearest_neighbors = np.argsort(distance_matrix, axis=1)[:, 1:k+1]
 
     for iteration in range(num_iters):
-        # Update cluster assignments and centroids
         similarities = np.dot(feats, centroids.T)
         soft_assignments = softmax(similarities / t, axis=1)
         
-        # Global constraint: Ignore low-confidence assignments
         confident_indices = np.max(soft_assignments, axis=1) >= tau
         confident_soft_assignments = soft_assignments[confident_indices]
         confident_feats = feats[confident_indices]
         
-        # Update centroids using confident assignments
         for j in range(num_samples):
             cluster_weights = confident_soft_assignments[:, j]
             weighted_sum = np.sum(cluster_weights[:, np.newaxis] * confident_feats, axis=0)
             centroid_weight = np.sum(cluster_weights)
             centroids[j] = weighted_sum / (centroid_weight + epsilon)
         
-        # Local constraint: Align with nearest neighbors
         local_regularization = np.zeros((n, num_samples))
         for i in range(n):
             neighbor_indices = nearest_neighbors[i]
@@ -574,11 +531,9 @@ def select_valuable_samples_USL_T(feats, name_list, num_samples, k=5, alpha=2, n
             sharpened_neighbor_avg = softmax(neighbor_avg / t)
             local_regularization[i] = sharpened_neighbor_avg
         
-        # Combine global and local constraints
         combined_assignments = lambda_reg * local_regularization + soft_assignments
         cluster_confidences = np.max(combined_assignments, axis=1)
     
-    # Select representative instances based on confidence
     selected_indices = np.argsort(-cluster_confidences)[:num_samples]
     select_samples_list = [name_list[i] for i in selected_indices]
     
@@ -599,28 +554,23 @@ def select_valuable_samples_Coreset(feats, name_list, num_samples):
     n_samples = len(name_list)
     labeled_idxs = np.zeros(n_samples, dtype=bool)
     
-    # Compute pairwise distance matrix using Euclidean distance
     dist_mat = np.matmul(feats, feats.T)
     diag = np.diag(dist_mat).reshape(-1, 1)
     dist_mat = -2 * dist_mat + diag + diag.T
     dist_mat = np.sqrt(np.clip(dist_mat, 0, None))
 
-    # Randomly select the first sample
     first_sample_idx = np.random.choice(np.arange(n_samples))
     labeled_idxs[first_sample_idx] = True
     
-    # Initialize distances to track minimum distance from labeled set
     min_distances = dist_mat[:, first_sample_idx]
 
     select_samples_list = [name_list[first_sample_idx]]
 
     for _ in tqdm(range(num_samples - 1), ncols=100):
-        # Select the sample that maximizes the minimum distance to labeled samples
         next_sample_idx = np.argmax(min_distances)
         labeled_idxs[next_sample_idx] = True
         select_samples_list.append(name_list[next_sample_idx])
 
-        # Update the minimum distances
         min_distances = np.minimum(min_distances, dist_mat[:, next_sample_idx])
 
     return select_samples_list
@@ -649,36 +599,5 @@ def generate_Coreset_plan(organ, feats_file, num_samples):
     save_path = f'./{organ}/plans/Coreset_{num_samples}.npz'
     np.savez(save_path, paths=paths)
 
-# generate_ALPS_plan(organ='BrainTumour', feats_file='./BrainTumour/feats/Ours.npz', num_samples=10)
-# generate_CALR_plan(organ='Spleen', feats_file='./Spleen/feats/Ours.npz', num_samples=5)
-generate_CALR_plan(organ='BrainTumour', feats_file='./BrainTumour/feats/Ours.npz', num_samples=4)
-# generate_TypiClust_plan(organ='BrainTumour', feats_file='./BrainTumour/feats/Ours.npz', num_samples=10)
-# generate_TypiClust_plan(organ='Heart', feats_file='./Heart/feats/Ours.npz', num_samples=5)
-# generate_TypiClust_plan(organ='Heart', feats_file='./Heart/feats/Ours.npz', num_samples=3)
-# generate_TypiClust_plan(organ='Heart', feats_file='./Heart/feats/Ours.npz', num_samples=3)
-# generate_TypiClust_plan(organ='Heart', feats_file='./Heart/feats/Ours.npz', num_samples=3)
-# generate_FPS_plan(organ='Spleen', feats_file='./Spleen/feats/Ours.npz', num_samples=3)
-# generate_FPS_plan(organ='Spleen', feats_file='./Spleen/feats/Ours.npz', num_samples=5)
-
-
-# generate_USL_T_plan(organ='BrainTumour_Multi-Modality',feats_file='./BrainTumour/feats/Ours.npz', num_samples=30)
-# generate_USL_T_plan(organ='BrainTumour_Multi-Modality',feats_file='./BrainTumour/feats/Ours.npz', num_samples=20)
-# generate_USL_T_plan(organ='BrainTumour_Multi-Modality',feats_file='./BrainTumour/feats/Ours.npz', num_samples=10)
-
-# generate_ALPS_plan(organ='BrainTumour_Multi-Modality',feats_file='./BrainTumour/feats/Ours.npz', num_samples=20)
-# generate_Probcover_plan(organ='BrainTumour_Multi-Modality',feats_file='./BrainTumour/feats/Ours.npz', num_samples=20)
-# generate_TypiClust_plan(organ='BrainTumour_Multi-Modality',feats_file='./BrainTumour/feats/Ours.npz', num_samples=20)
-
-
-# generate_USL_plan(organ='BrainTumour', feats_file='./BrainTumour/feats/Ours.npz', num_samples=10)
-# generate_USL_T_plan(organ='BrainTumour', feats_file='./BrainTumour/feats/Ours.npz', num_samples=10)
-# generate_USL_plan(organ='Heart', feats_file='./Heart/feats/Ours.npz', num_samples=4)
-# generate_USL_T_plan(organ='Heart', feats_file='./Heart/feats/Ours.npz', num_samples=4)
-
-# generate_USL_plan(organ='Heart', feats_file='./Heart/feats/Ours.npz', num_samples=5)
-# generate_USL_plan(organ='Spleen', feats_file='./Spleen/feats/Ours.npz', num_samples=3)
-# generate_USL_plan(organ='Spleen', feats_file='./Spleen/feats/Ours.npz', num_samples=4)
-# generate_USL_plan(organ='Spleen', feats_file='./Spleen/feats/Ours.npz', num_samples=5)
-
-# generate_USL_plan(organ='Pancreas', feats_file='./Pancreas/feats/Ours.npz', num_samples=20)
-# generate_USL_T_plan(organ='Pancreas', feats_file='./Pancreas/feats/Ours.npz', num_samples=20)
+if __name__ == "main":
+    generate_TypiClust_plan(organ='Heart', feats_file='./Heart/feats/Ours.npz', num_samples=5)
